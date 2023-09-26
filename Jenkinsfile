@@ -2,40 +2,43 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Pull Repositories') {
             steps {
-                // Ambil kode dari repositori Git
-                checkout scm
+                echo 'Hello, World Koding!'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Stop Container') {
             steps {
-                // Membangun Docker image dengan Dockerfile yang ada di direktori konteks
-                script {
-                    docker.build("testRepo:latest", "-f Dockerfile .")
-                }
+                echo 'Stopping the running container...'
+                sh 'docker stop mycontainer || true'
+                sh 'docker rm mycontainer || true'
+                echo 'Container stopped.'
             }
         }
 
-        stage('Run Docker Compose') {
+        stage('Docker Images') {
             steps {
-                // Menjalankan Docker Compose
-                sh 'docker-compose up -d'
+                echo 'Building Docker images...'
+
+                // Menghapus image sebelumnya
+                sh 'docker rmi my-docker-image:latest || true'
+
+                echo 'Proses Build'
+                sh 'docker build -t my-docker-image:latest .'
+                echo 'Menampilkan hasil images'
+                sh 'docker images'
             }
         }
-    }
 
-    post {
-        success {
-            // Tindakan yang akan dijalankan jika pipeline berhasil
-            // Contoh: Kirim notifikasi, laporan ke Slack, dsb.
-            echo 'Pipeline berhasil!'
-        }
-        failure {
-            // Tindakan yang akan dijalankan jika pipeline gagal
-            // Contoh: Kirim notifikasi kesalahan ke Slack, laporan bug, dsb.
-            echo 'Pipeline gagal!'
+        stage('Deploy') {
+            steps {
+                echo 'Running the container...'
+                sh 'docker run -d --name mycontainer -p 3001:9000 --restart=always my-docker-image:latest'
+
+                echo 'Container is now running.'
+                sh 'docker ps'
+            }
         }
     }
 }
