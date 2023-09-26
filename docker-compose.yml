@@ -1,0 +1,7 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .  # Direktori konteks adalah direktori yang berisi Dockerfile
+    ports:
+      - "9000:9000"  # Meneruskan port 9000 dari host ke kontainer
