@@ -10,10 +10,10 @@ WORKDIR /go/src/app
 
 # Menginstal dependensi dan mengkompilasi aplikasi
 RUN go get -d -v ./...
-RUN go install -v ./...
+RUN go build -o app
 
 # Port yang akan digunakan oleh aplikasi
 EXPOSE 9000
 
 # Perintah untuk menjalankan aplikasi ketika container berjalan
-CMD ["app"]
+CMD ["./app"]
