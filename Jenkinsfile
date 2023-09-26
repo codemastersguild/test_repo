@@ -17,6 +17,12 @@ pipeline {
             }
         }
 
+        stage('Docker Compose') {
+            steps {
+                sh 'docker compose up'
+            }
+        }
+
         stage('Docker Images') {
             steps {
                 echo 'Building Docker images...'
