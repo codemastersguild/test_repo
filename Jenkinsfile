@@ -2,49 +2,40 @@ pipeline {
     agent any
 
     stages {
-        stage('Pull Repositories') {
+        stage('Checkout') {
             steps {
-                echo 'Hello, World Koding!'
+                // Ambil kode dari repositori Git
+                checkout scm
             }
         }
 
-        stage('Stop Container') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Stopping the running container...'
-                sh 'docker stop mycontainer || true'
-                sh 'docker rm mycontainer || true'
-                echo 'Container stopped.'
+                // Membangun Docker image dengan Dockerfile yang ada di direktori konteks
+                script {
+                    docker.build("testRepo:latest", "-f Dockerfile .")
+                }
             }
         }
 
-        stage('Docker Compose') {
+        stage('Run Docker Compose') {
             steps {
+                // Menjalankan Docker Compose
                 sh 'docker-compose up -d'
             }
         }
+    }
 
-        stage('Docker Images') {
-            steps {
-                echo 'Building Docker images...'
-
-                // Menghapus image sebelumnya
-                sh 'docker rmi myimage:latest || true'
-
-                echo 'Proses Build'
-                sh 'docker build -t myimage:latest .'
-                echo 'Menampilkan hasil images'
-                sh 'docker images'
-            }
+    post {
+        success {
+            // Tindakan yang akan dijalankan jika pipeline berhasil
+            // Contoh: Kirim notifikasi, laporan ke Slack, dsb.
+            echo 'Pipeline berhasil!'
         }
-
-        stage('Deploy') {
-            steps {
-                echo 'Running the container...'
-                sh 'docker run -d --name mycontainer -p 3001:9000 --restart=always myimage:latest'
-
-                echo 'Container is now running.'
-                sh 'docker ps'
-            }
+        failure {
+            // Tindakan yang akan dijalankan jika pipeline gagal
+            // Contoh: Kirim notifikasi kesalahan ke Slack, laporan bug, dsb.
+            echo 'Pipeline gagal!'
         }
     }
 }
